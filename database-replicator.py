@@ -29,7 +29,7 @@ try:
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s: %(lineno)d (%(levelname)s) %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
-                        filename='log/%s.log' % (profile),
+                        filename='%s.log' % (profile),
                         filemode='w')
 
     console = logging.StreamHandler()
@@ -38,7 +38,7 @@ try:
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
 
-    status_file = 'bin/{}.bin'.format(profile)
+    status_file = '{}.bin'.format(profile)
 
     if os.path.isfile(status_file):
         with open(status_file, 'rb') as f:
