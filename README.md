@@ -19,7 +19,7 @@ python3 database-replicator.py [-h] [-r] profile
 
 ## Configuration:
 
-The repo includes a sample config.xml. The predefined tags in this XML dictate the configuration of a given profile. Note that the `profile` tags can be duplicated as many times as needed to support as many profiles as are desired. The following is an explanation of each tag:
+The repo includes a sample config.xml. The predefined tags in this XML dictate the configuration of a given profile. Note that the `profile` tags can be duplicated within the `config` tags. Each duplication should have a unique `name` attribute value. The following is an explanation of each tag:
 
 Tag | Data Type | Requirements
 --- | --- | ---
