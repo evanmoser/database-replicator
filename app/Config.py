@@ -10,11 +10,12 @@ class Config:
             if p.get('name') == profile:
                 self.table = str(p.find('table').text)
                 self.retro = int(p.find('retroactive').text)
+                self.primary_key = str(p.find('primary_key').text)
                 self.selected_fields = str(p.find('selected_fields').text)
                 self.incremental_field = str(p.find('incremental_field').text)
 
-                self.conn_src = str(p.find('source').find('connection').text)
-                self.conn_dest = str(p.find('destination').find('connection').text)
+                self.conn_source = str(p.find('source').find('connection').text)
+                self.conn_destination = str(p.find('destination').find('connection').text)
 
                 self.ssl_req_src = int(p.find('source').find('ssl').find('required').text)
                 self.ssl_req_dest = int(p.find('destination').find('ssl').find('required').text)
