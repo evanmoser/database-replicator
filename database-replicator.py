@@ -31,7 +31,7 @@ if args.retro:
     retroactive = True
     logging.info("Retroactive replication required per supplied argument.")
 
-logging.info("Let's take a look at the configuration for the %s profile.", args.profile)
+logging.info("Let's take a look at the configuration for the {} profile.".format(args.profile))
 
 # pull variables from xml configuration
 config = Config('config.xml', args.profile)
@@ -41,7 +41,7 @@ if config.retro == 1:
     logging.info("Retroactive replication required per supplied configuration.")
 
 # connect to database and begin replication process
-logging.info("We're starting this thing off right for the %s table.", config.table)
+logging.info("We're starting this thing off right for the {} table.".format(config.table))
 
 engine_source = create_engine(config.conn_source, echo=False, connect_args=config.get_ssl_src())
 engine_destination = create_engine(config.conn_destination, echo=False, connect_args=config.get_ssl_dest())
