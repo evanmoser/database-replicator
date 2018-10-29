@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!-- THIS FILE MUST BE NAMED config.xml FOR PRODUCTION -->
+<config>
+    <profile name="profile">
+        <table></table>
+        <retroactive>1</retroactive>
+        <selected_fields>*</selected_fields>
+        <incremental_field></incremental_field>
+        <source>
+            <connection></connection>
+            <ssl>
+                <required>0</required>
+                <ca></ca>
+                <key></key>
+                <cert></cert>
+            </ssl>
+        </source>
+        <destination>
+        <connection></connection>
+            <ssl>
+                <required>0</required>
+                <ca></ca>
+                <key></key>
+                <cert></cert>
+            </ssl>
+        </destination>
+        <offset>
+            <hours>0</hours>
+            <minutes>0</minutes>
+        </offset>
+    </profile>
+</config>
