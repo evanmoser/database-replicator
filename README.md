@@ -14,8 +14,13 @@ python3 database-replicator.py [-h] [-r] profile
 
 ## Dependencies
 
+requirements.txt includes all dependencies
+
 1. SQLAlchemy
 2. PyLint and dependencies (included in requirements.txt but only necessary for development)
+3. Pandas
+4. Numpy
+5. PyODBC (optional)
 
 ## Configuration:
 
@@ -26,7 +31,7 @@ Tag | Data Type | Requirements
 `profile` | string | Must have a name attribute with a string value. For use as an argument when executing application.
 `table` | string | The targeted table name
 `retroactive` | binary | A value of 1 forces a retroactive sync for every run, regardless of other configurations
-`selected_fields` | string | * to replicate all fields or comma seperated list of column headers to be selective
+`selective_fields` | string | * to replicate all fields or comma seperated list of column headers to be selective
 `incremental_field` | string | The column holding a date/datetime/timestamp field. Used to determine what records have been updated for incremental sync
 `source` | none | Tags to hold source connection config
 `destination` | none | Tags to hold destination connection config
