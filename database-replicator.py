@@ -38,6 +38,7 @@ config = Config('config.xml', args.profile)
 
 if config.retro == 1:
     retroactive = True
+    logging.info("Retroactive replication required per supplied configuration.")
 
 # connect to database and begin replication process
 logging.info("We're starting this thing off right for the %s table.", config.table)
@@ -47,6 +48,11 @@ engine_destination = create_engine(config.conn_destination, echo=False, connect_
 
 # build dataframe from source database engine
 data_source = pd.read_sql_table(config.table, engine_source)
+
+if config.selective_fields != '*' or config.selective_fields != '':
+    selective_fields = config.selective_fields.split(",")
+    data_source = data_source[selective_fields]
+    logging.info("Selective fields have been established. Data frames will be restricted to the identified columns: %s", selective_fields)
 
 # if destination table exists, consider difference in columns to determine retroactive replication
 if engine_destination.has_table(config.table):
