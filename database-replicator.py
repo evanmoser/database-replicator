@@ -1,6 +1,7 @@
 # pylint: disable=invalid-name
 """ Database replication utility """
-import os, logging, datetime, pickle, argparse, xml.etree.ElementTree as ET
+import os, logging, datetime, pickle, argparse
+from app.Config import Config
 from sqlalchemy.inspection import inspect
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker, Session, load_only
@@ -34,11 +35,11 @@ try:
 
     console = logging.StreamHandler()
     console.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(lineno)d (%(levelname)s) %(message)s')
+    formatter = logging.Formatter('(%(levelname)s) %(message)s')
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
 
-    status_file = '{}.bin'.format(profile)
+    status_file = '{}.pickle'.format(profile)
 
     if os.path.isfile(status_file):
         with open(status_file, 'rb') as f:
@@ -55,56 +56,25 @@ try:
 
     logging.info("Let's take a look at the configuration for the %s profile.", profile)
 
+
     # pull variables from xml configuration
-    tree = ET.parse('config.xml')
-    root = tree.getroot()
-    for p in root.findall('profile'):
-        if p.get('name') == profile:
-            table = str(p.find('table').text)
-            retro = int(p.find('retroactive').text)
-            incremental_field = str(p.find('incremental_field').text)
+    config = Config('config.xml', profile)
 
-            if retro == 1:
-                retroactive = True
+    if config.retro == 1:
+        retroactive = True
 
-            conn_src = str(p.find('source').find('connection').text)
-            conn_dest = str(p.find('destination').find('connection').text)
-
-            ssl_req_src = int(p.find('source').find('ssl').find('required').text)
-            ssl_req_dest = int(p.find('destination').find('ssl').find('required').text)
-
-            ssl_ca_src = str(p.find('source').find('ssl').find('ca').text)
-            ssl_key_src = str(p.find('source').find('ssl').find('key').text)
-            ssl_cert_src = str(p.find('source').find('ssl').find('cert').text)
-
-            ssl_ca_dest = str(p.find('destination').find('ssl').find('ca').text)
-            ssl_key_dest = str(p.find('destination').find('ssl').find('key').text)
-            ssl_cert_dest = str(p.find('destination').find('ssl').find('cert').text)
-
-            if ssl_req_src == 1:
-                ssl_src = {'ssl': {'cert':ssl_cert_src,'key':ssl_key_src,'ca':ssl_ca_src}}
-            else:
-                ssl_src = dict()
-
-            if ssl_req_dest == 1:
-                ssl_dest = {'ssl': {'cert':ssl_cert_dest,'key':ssl_key_dest,'ca':ssl_ca_dest}}
-            else:
-                ssl_dest = dict()
-
-            offset_hours = int(p.find('offset').find('hours').text)
-            offset_minutes = int(p.find('offset').find('minutes').text)
-
-    logging.info("We're starting this thing off right for the %s table.", table)
+    # connect to database and begin replication process
+    logging.info("We're starting this thing off right for the %s table.", config.table)
     
-    eng_src = create_engine(conn_src, echo=False, connect_args=ssl_src)
-    eng_dest = create_engine(conn_dest, echo=False, connect_args=ssl_dest)
+    eng_src = create_engine(config.conn_src, echo=False, connect_args=config.get_ssl_src())
+    eng_dest = create_engine(config.conn_dest, echo=False, connect_args=config.get_ssl_dest())
     collation_mssql = 'SQL_Latin1_General_CP1_CI_AS'
     collation_mysql = 'utf8_general_ci'
 
     base_src = automap_base()
     base_src.prepare(eng_src, reflect=True)
-    tbl_src = getattr(base_src.classes, table)
-    meta_src = base_src.metadata.tables["{}".format(table)]
+    tbl_src = getattr(base_src.classes, config.table)
+    meta_src = base_src.metadata.tables["{}".format(config.table)]
 
     base_dest = automap_base()
     base_dest.prepare(eng_dest, reflect=True)
@@ -120,7 +90,7 @@ try:
                     column.type.collation = '{}'.format(collation_mssql)
 
     # table confirmation/creation
-    if table not in tbls_dest:
+    if config.table not in tbls_dest:
         logging.info('Table does not exist in destination. Creating table.')
         meta_src.create(eng_dest)
         logging.info('Table created in destination.')
@@ -131,7 +101,7 @@ try:
         # confirm that tables are the same
         base_dest = automap_base()
         base_dest.prepare(eng_dest, reflect=True)
-        meta_dest = base_dest.metadata.tables["{}".format(table)]
+        meta_dest = base_dest.metadata.tables["{}".format(config.table)]
         
         # compare column lists of source and destination and recreate table if no match
         if str(meta_src.columns) != str(meta_dest.columns):
@@ -145,7 +115,7 @@ try:
 
     base_dest = automap_base()
     base_dest.prepare(eng_dest, reflect=True)
-    tbl_dest = getattr(base_dest.classes, table)
+    tbl_dest = getattr(base_dest.classes, config.table)
 
     Source = sessionmaker(bind=eng_src)
     Source = Source()
@@ -245,12 +215,12 @@ try:
 
         # offset last successful timestamp to account for timezone differences and/or syncing latency
         success = status['LastSuccessfulAttempt']
-        offset = datetime.timedelta(hours=offset_hours,minutes=offset_minutes)
+        offset = datetime.timedelta(hours=config.offset_hours,minutes=config.offset_minutes)
         adjusted = str(success - offset)
 
         # determine which records need to be updated
-        logging.info('Looking back to records modified since %s using field %s' % (adjusted, incremental_field))
-        all_src = Source.query(tbl_src).filter(getattr(tbl_src, incremental_field) > adjusted).all()
+        logging.info('Looking back to records modified since %s using field %s' % (adjusted, config.incremental_field))
+        all_src = Source.query(tbl_src).filter(getattr(tbl_src, config.incremental_field) > adjusted).all()
         logging.info('%s records have been identified for update.', len(all_src))
         if all_src:
             for obj in all_src:
@@ -283,8 +253,8 @@ try:
     logging.debug('Closed source session.')
     
     if not retroactive:
-        last_successful = Destination.query(tbl_dest).options(load_only(incremental_field)).order_by(desc(getattr(tbl_dest, incremental_field))).first()
-        last_successful = getattr(last_successful, incremental_field)
+        last_successful = Destination.query(tbl_dest).options(load_only(config.incremental_field)).order_by(desc(getattr(tbl_dest, config.incremental_field))).first()
+        last_successful = getattr(last_successful, config.incremental_field)
         logging.info('Recording last successful incremental sync as: %s' % last_successful)
     else:
         last_successful = datetime.datetime.strptime(now, '%Y-%m-%d %H:%M:%S')
