@@ -52,11 +52,11 @@ data_source = pd.read_sql_table(config.table, engine_source)
 if config.selective_fields != '*' or config.selective_fields != '':
     selective_fields = config.selective_fields.split(",")
     data_source = data_source[selective_fields]
-    logging.info("Selective fields have been established. Data frames will be restricted to the identified columns: %s", selective_fields)
+    logging.info("Selective fields have been established. Data frames will be restricted to the identified columns: {}".format(selective_fields))
 
 # if destination table exists, consider difference in columns to determine retroactive replication
 if engine_destination.has_table(config.table):
-    logging.info("The destination database contains a %s table. Determining if tables are the same.", config.table)
+    logging.info("The destination database contains a {} table. Determining if tables are the same.".format(config.table))
 
     # build dataframe from destination database engine
     data_destination = pd.read_sql_table(config.table, engine_destination)
@@ -73,7 +73,7 @@ if engine_destination.has_table(config.table):
 
 # if destination table does not exist, force retroactive replication
 if not engine_destination.has_table(config.table):
-    logging.info("The destination database does not contain a %s table. Requiring retroactive replication.", config.table)
+    logging.info("The destination database does not contain a {} table. Requiring retroactive replication.".format(config.table))
     retroactive = True
 
 # run retroactive replication
@@ -94,8 +94,8 @@ if not retroactive:
     records_to_delete = data_destination[data_destination[config.primary_key].isin(records_to_delete)]
     for record in records_to_delete[config.primary_key]:
         sql.execute('DELETE FROM {0} WHERE {1} = ?'.format(config.table, config.primary_key), engine_destination, params=[record])
-        logging.debug("Deleted record %s as part of a DELETE action.", record)
-    logging.info("Deleted %s records.", len(records_to_delete))
+        logging.debug("Deleted record {} as part of a DELETE action.".format(record))
+    logging.info("Deleted {} records.".format(len(records_to_delete)))
 
     # determine last modified date based on incremental_field and adjust for any provided offset
     incremental_threshold = data_destination[config.incremental_field].max()
@@ -105,8 +105,8 @@ if not retroactive:
     records_to_update = data_source[(data_source[config.incremental_field] > incremental_threshold)]
     for record in records_to_update[config.primary_key]:
         sql.execute('DELETE FROM {0} WHERE {1} = ?'.format(config.table, config.primary_key), engine_destination, params=[record])
-        logging.debug("Deleted record %s as part of an UPDATE action.", record)
+        logging.debug("Deleted record {} as part of an UPDATE action.".format(record))
     records_to_update.to_sql(config.table, engine_destination, index=False, if_exists='append')
-    logging.info("Updated %s records.", len(records_to_update))
+    logging.info("Updated {} records.".format(len(records_to_update)))
 
-logging.info("Replication complete for the %s table.", config.table)
+logging.info("Replication complete for the {} table.".format(config.table))
