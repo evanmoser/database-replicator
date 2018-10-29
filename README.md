@@ -12,7 +12,7 @@ python3 database-replicator.py [-h] [-r] profile
 
 `profile` The string value specified in the config.xml (see Configuration)
 
-## Prerequisites
+## Dependencies
 
 1. SQLAlchemy
 2. PyLint and dependencies (included in requirements.txt but only necessary for development)
