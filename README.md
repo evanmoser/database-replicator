@@ -47,5 +47,8 @@ Tag | Data Type | Requirements
 
 ## Limitations
 
-1. Only supports single-column primary keys for incremental sync
-2. PyODBC for MySQL has limitations due to the connector. This is a known restriction in SQLAlchemy, and is not supported in most configurations of this application
+1. Only supports single-column primary keys for incremental replication.
+2. PyODBC for MySQL has limitations due to the connector. This is a known restriction, documented in the SQLAlchemy documentation.
+3. The application does not perform a full comparison of all data during incremental replications. Should a data point change without updating the `incremental_field` datetime, it is possible the replication will not capture those changes.
+4. The application performs only one-way replications, not syncing. Should the destination table be updated, those changes will not be replicated to the source, and could result in inconsistent data between each database table.
+
