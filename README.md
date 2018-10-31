@@ -26,24 +26,24 @@ requirements.txt includes all dependencies
 
 The repo includes a sample config.xml. The predefined tags in this XML dictate the configuration of a given profile. Note that the `profile` tags can be duplicated within the `config` tags. Each duplication should have a unique `name` attribute value. The following is an explanation of each tag:
 
-Tag | Data Type | Requirements
---- | --- | ---
-`profile` | string | Must have a name attribute with a string value. For use as an argument when executing application.
-`table` | string | The targeted table name
-`retroactive` | binary | A value of 1 forces a retroactive sync for every run, regardless of other configurations
-`selective_fields` | string | * or blank to replicate all fields or comma seperated list of column headers to be selective
-`incremental_field` | string | The column holding a date/datetime/timestamp field. Used to determine what records have been updated for incremental sync
-`source` | none | Tags to hold source connection config
-`destination` | none | Tags to hold destination connection config
-`connection` | string | Any valid SQLAlchemy connection string (see Limitations)
-`ssl` | none | Tags to hold ssl config
-`required` | binary | A value of 1 forces the application to read the remaining SSL config options
-`ca` | string | File path of the certificate authority
-`key` | string | File path of the client key
-`cert` | string | File path of the client certificate
-`offset` | none | Tags to hold hours and minutes of offset
-`hours` | int | How many hours to offset a retroactive sync (A value of 1 would subtract 1 hour from the `incremental_field`
-`minutes` | int | How many minutes to offset a retroactive sync (A value of 30 would subtract 30 minutes from the `incremental_field`
+Tag | Data Type | Nullable | Notes
+--- | --- | --- | ---
+`profile` | string | NO | Must have a name attribute with a string value. For use as an argument when executing application.
+`table` | string | NO | The targeted table name
+`retroactive` | binary | NO | A value of 1 forces a retroactive sync for every run, regardless of other configurations
+`selective_fields` | string | YES | * or blank to replicate all fields or comma seperated list of column headers to be selective
+`incremental_field` | string | YES | The column holding a date/datetime/timestamp field. Used to determine what records have been updated for incremental replication. Required if using incremental replication.
+`source` | none | NO | Tags to hold source connection config
+`destination` | none | NO | Tags to hold destination connection config
+`connection` | string | NO | Any valid SQLAlchemy connection string (see Limitations)
+`ssl` | none | YES | Tags to hold ssl config
+`required` | binary | YES | A value of 1 forces the application to read the remaining SSL config options
+`ca` | string | YES | File path of the certificate authority
+`key` | string | YES | File path of the client key
+`cert` | string | YES | File path of the client certificate
+`offset` | none | NO | Tags to hold hours and minutes of offset
+`hours` | int | NO | How many hours to offset a retroactive sync (A value of 1 would subtract 1 hour from the `incremental_field`
+`minutes` | int | NO | How many minutes to offset a retroactive sync (A value of 30 would subtract 30 minutes from the `incremental_field`
 
 ## Limitations
 
