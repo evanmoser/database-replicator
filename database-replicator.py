@@ -93,7 +93,7 @@ if not retroactive:
     records_to_delete = set(data_destination[config.primary_key]).difference(data_source[config.primary_key])
     records_to_delete = data_destination[data_destination[config.primary_key].isin(records_to_delete)]
     for record in records_to_delete[config.primary_key]:
-        sql.execute('DELETE FROM {0} WHERE {1} = ?'.format(config.table, config.primary_key), engine_destination, params=[record])
+        sql.execute(f"DELETE FROM {config.table} WHERE {config.primary_key} = '{record}'", engine_destination)
         logging.debug("Deleted record {} as part of a DELETE action.".format(record))
     logging.info("Deleted {} records.".format(len(records_to_delete)))
 
@@ -104,7 +104,7 @@ if not retroactive:
 
     records_to_update = data_source[(data_source[config.incremental_field] > incremental_threshold)]
     for record in records_to_update[config.primary_key]:
-        sql.execute('DELETE FROM {0} WHERE {1} = ?'.format(config.table, config.primary_key), engine_destination, params=[record])
+        sql.execute(f"DELETE FROM {config.table} WHERE {config.primary_key} = '{record}'", engine_destination)
         logging.debug("Deleted record {} as part of an UPDATE action.".format(record))
     records_to_update.to_sql(config.table, engine_destination, index=False, if_exists='append')
     logging.info("Updated {} records.".format(len(records_to_update)))

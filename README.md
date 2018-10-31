@@ -51,4 +51,5 @@ Tag | Data Type | Requirements
 2. PyODBC for MySQL has limitations due to the connector. This is a known restriction, documented in the SQLAlchemy documentation.
 3. The application does not perform a full comparison of all data during incremental replications. Should a data point change without updating the `incremental_field` datetime, it is possible the replication will not capture those changes.
 4. The application performs only one-way replications, not syncing. Should the destination table be updated, those changes will not be replicated to the source, and could result in inconsistent data between each database table.
+5. Updating is done by deleting from the destination table and appending a Pandas dataframe in its place. Deleting is not supported by Pandas (to the best of my knowledge). As such, raw SQL is used. Be wary of SQL injection. Since this should be used by administrators without user input, the risk of injection is mitigated, but other applications would want this revised.
 
