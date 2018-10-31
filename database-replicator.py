@@ -49,8 +49,8 @@ engine_destination = create_engine(config.conn_destination, echo=False, connect_
 # build dataframe from source database engine
 data_source = pd.read_sql_table(config.table, engine_source)
 
-if config.selective_fields != '*' or config.selective_fields != '':
-    selective_fields = config.selective_fields.split(",")
+if config.selective_fields != '*' and config.selective_fields != 'None':
+    selective_fields = config.selective_fields.replace(", ", ",").split(",")
     data_source = data_source[selective_fields]
     logging.info("Selective fields have been established. Data frames will be restricted to the identified columns: {}".format(selective_fields))
 
