@@ -99,8 +99,13 @@ if not retroactive:
 
     # determine last modified date based on incremental_field and adjust for any provided offset
     incremental_threshold = data_destination[config.incremental_field].max()
+    logging.info("Established most recent {0} date/time of {1}.".format(config.incremental_field, incremental_threshold))
+
     offset = datetime.timedelta(hours=config.offset_hours,minutes=config.offset_minutes)
+    logging.info("Adjusting most recent by an offset of {0} hour(s) and {1} minute(s), per configuration.".format(config.offset_hours, config.offset_minutes))
+    
     incremental_threshold = str(incremental_threshold - offset)
+    logging.info("Incrementally replicating all records with {0} column updated since {1}".format(config.incremental_field, incremental_threshold))
 
     records_to_update = data_source[(data_source[config.incremental_field] > incremental_threshold)]
     for record in records_to_update[config.primary_key]:
