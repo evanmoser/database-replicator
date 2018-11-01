@@ -1,6 +1,6 @@
 # database-replicator
 
-Profile-based database table replication and sync tool
+Profile-based database table replication utility for any SQLAlchemy supported database (MSSQL to MySQL, MySQL to MySQL, MySQL to MSSQL, etc).
 
 ## Running the application
 
