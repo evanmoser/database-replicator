@@ -2,7 +2,7 @@ import os, xml.etree.ElementTree as ET
 
 class Config:
     def __init__(self, xml_path, profile):
-        tree = ET.parse('config.xml')
+        tree = ET.parse(xml_path)
 
         root = tree.getroot()
 

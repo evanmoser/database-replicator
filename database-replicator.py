@@ -34,7 +34,9 @@ if args.retro:
 logging.info("Let's take a look at the configuration for the {} profile.".format(args.profile))
 
 # pull variables from xml configuration
-config = Config('config.xml', args.profile)
+
+config_xml_path = os.path.join(os.path.dirname(__file__), 'config.xml')
+config = Config(config_xml_path, args.profile)
 
 if config.retro == 1:
     retroactive = True
