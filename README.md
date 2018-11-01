@@ -33,7 +33,7 @@ Tag | Data Type | Nullable | Notes
 --- | --- | --- | ---
 `profile` | string | NO | Must have a name attribute with a string value. For use as an argument when executing application.
 `table` | string | NO | The targeted table name
-`retroactive` | binary | NO | A value of 1 forces a retroactive sync for every run, regardless of other configurations
+`retroactive` | binary | NO | A value of 1 forces a retroactive replication for every run, regardless of other configurations
 `primary_key` | string | NO | The primary key of the source table. Supports only single-column primary keys.
 `selective_fields` | string | YES | * or blank to replicate all fields or comma seperated list of column headers to be selective
 `incremental_field` | string | YES | The column holding a date/datetime/timestamp field. Used to determine what records have been updated for incremental replication. Required if using incremental replication.
@@ -46,14 +46,14 @@ Tag | Data Type | Nullable | Notes
 `key` | string | YES | File path of the client key
 `cert` | string | YES | File path of the client certificate
 `offset` | none | NO | Tags to hold hours and minutes of offset
-`hours` | int | NO | How many hours to offset a retroactive sync (A value of 1 would subtract 1 hour from the `incremental_field`
-`minutes` | int | NO | How many minutes to offset a retroactive sync (A value of 30 would subtract 30 minutes from the `incremental_field`
+`hours` | int | NO | How many hours to offset a retroactive replication (A value of 1 would subtract 1 hour from the `incremental_field`
+`minutes` | int | NO | How many minutes to offset a retroactive replication (A value of 30 would subtract 30 minutes from the `incremental_field`
 
 ## Limitations
 
 1. Only supports single-column primary keys for incremental replication.
 2. PyODBC for MySQL has limitations due to the connector. This is a known restriction, documented in the SQLAlchemy documentation.
 3. The application does not perform a full comparison of all data during incremental replications. Should a data point change without updating the `incremental_field` datetime, it is possible the replication will not capture those changes.
-4. The application performs only one-way replications, not syncing. Should the destination table be updated, those changes will not be replicated to the source, and could result in inconsistent data between each database table.
+4. The application performs only one-way replications, not synchronization. Should the destination table be updated, those changes will not be replicated to the source, and could result in inconsistent data between each database table.
 5. Updating is done by deleting from the destination table and appending a Pandas dataframe in its place. Deleting is not supported by Pandas (to the best of my knowledge). As such, raw SQL execution is used. Be wary of SQL injection. Since this should be used by administrators without user input, the risk of injection is mitigated, but other applications would want to consider these implications.
 
